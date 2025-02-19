@@ -22,3 +22,8 @@ th {
 tr:nth-child(odd) {
     background-color: lightgray;
 }
+
+.threeColGrid {
+    display: grid;
+    grid-template-columns: auto auto auto;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Borrowing</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <!-- <script src='main.js'></script> -->
+</head>
+
+<body>
+    <dialog id="createUserDialog">
+        <fieldset>
+            <legend>Create new user...</legend>
+            <form class="threeColGrid" method="dialog">
+                <label for="fullName">Full name</label>
+                <input id="fullName">
+                <p id="fullNameError"></p>
+                <label for="email">Email</label>
+                <input id="email">
+                <p id="emailError"></p>
+                <label for="phone">Phone #</label>
+                <input id="phone">
+                <p id="phoneError"></p>
+                <label for="role">Role</label>
+                <select id="role">
+                    <option value="default" selected>Please select and option...</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Librarian">Librarian</option>
+                    <option value="Student">Student</option>
+                    <option value="Teacher">Teacher</option>
+                </select>
+                <p id="roleError"></p>
+            </form>
+        </fieldset>
+    </dialog>
+    <div class="center">
+        <h1>Borrowing database</h1>
+    </div>
+    <div class="center">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Item</th>
+                    <th>Date borrowed</th>
+                    <th>Date due</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+</body>
+<script src="main.js"></script>
+
+</html>

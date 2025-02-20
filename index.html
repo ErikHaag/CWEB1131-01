@@ -12,32 +12,15 @@
 
 <body>
     <dialog id="createUserDialog">
-        <fieldset>
-            <legend>Create new user...</legend>
-            <form class="threeColGrid" method="dialog">
-                <label for="fullName">Full name</label>
-                <input id="fullName">
-                <p id="fullNameError"></p>
-                <label for="email">Email</label>
-                <input id="email">
-                <p id="emailError"></p>
-                <label for="phone">Phone #</label>
-                <input id="phone">
-                <p id="phoneError"></p>
-                <label for="role">Role</label>
-                <select id="role">
-                    <option value="default" selected>Please select and option...</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Librarian">Librarian</option>
-                    <option value="Student">Student</option>
-                    <option value="Teacher">Teacher</option>
-                </select>
-                <p id="roleError"></p>
-            </form>
-        </fieldset>
     </dialog>
     <div class="center">
         <h1>Borrowing database</h1>
+    </div>
+    <div class="center">
+        <div>
+            <a href="create.php" class="button">New Borrow...</a>
+            <button id="refresh">Refresh</button>
+        </div>
     </div>
     <div class="center">
         <table>

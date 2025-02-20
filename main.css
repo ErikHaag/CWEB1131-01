@@ -26,4 +26,21 @@ tr:nth-child(odd) {
 .threeColGrid {
     display: grid;
     grid-template-columns: auto auto auto;
+    margin-bottom: 10px;
+}
+
+fieldset {
+    width: max-content;
+}
+
+fieldset input, fieldset select {
+    margin-left: 10px;
+}
+
+fieldset p {
+    margin-left: 10px;
+}
+
+fieldset p:empty {
+    margin: 16px 0px;
 }

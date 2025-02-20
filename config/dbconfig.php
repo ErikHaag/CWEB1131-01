@@ -8,6 +8,7 @@ try {
     $conn = new PDO("mysql:host={$host}; dbname={$dbName};", $userName, $password);
 } catch (Exception $e) {
     echo "{\"type\": \"error\", \"message\": \"An error occurred! " . $e->getMessage()."\"";
+    return;
 }
 
 function getAllData($c, $query) {

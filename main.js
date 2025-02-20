@@ -1,8 +1,13 @@
+let data = [];
 async function updateTable() {
     let response = await fetch("./API.php");
-    let data = await response.json();
+    data = await response.json();
+    // console.log(data);
     let tableHTML = "";
-    if (data.length == 0) {
+    if (data.type == "error") {
+        return
+    }
+    if (data?.borrows?.length == 0) {
         tableHTML += "<tr>";
         tableHTML += "<td colspan=\"5\">";
         tableHTML += "<div class=\"center\">";
@@ -11,7 +16,7 @@ async function updateTable() {
         tableHTML += "</td>";
         tableHTML += "</tr>";
     } else {
-        for (const row of data) {
+        for (const row of data.borrows) {
             tableHTML += "<tr>";
             tableHTML += "<td>" + row.userName + "</td>";
             tableHTML += "<td>" + row.itemName + "</td>";
@@ -25,3 +30,7 @@ async function updateTable() {
 }
 
 updateTable()
+
+document.getElementById("refresh").addEventListener("click", ()=>{
+    updateTable();
+})

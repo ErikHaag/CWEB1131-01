@@ -46,7 +46,6 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     //create inputs
     $inputs = ["user" => $_POST["user"] ?? "", "item" => $_POST["item"] ?? "", "dateBorrowed" => $_POST["dateBorrowed"] ?? "", "dateDue" => $_POST["dateDue"] ?? "", "usageLoc" => $_POST["usageLoc"] ?? "", "status" => $_POST["status"] ?? ""];
-    print_r($inputs);
     //Sanitize
     $errors = sanitize($inputs);
     if (count($errors) == 0) {
@@ -74,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         //fix datetime
         $inputs["dateBorrowed"] = str_replace("T", " ", $inputs["dateBorrowed"]).":00";
         $inputs["dateDue"] = str_replace("T", " ", $inputs["dateDue"]).":00";
-        print_r($inputs);
         // Execute
         try {
             // create query

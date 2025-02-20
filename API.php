@@ -64,6 +64,30 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $requestData = json_decode(file_get_contents('php://input'), true);
     $inputs = [];
     switch ($requestData["requestType"] ?? "") {
+        case "deleteBorrow":
+            $inputs["id"] = $requestData["id"] ?? "";
+            $errors = sanitize($inputs);
+            if (count($errors) > 0) {
+                echo "{ \"type\": \"error\", \"message\": \"{$errors['id']}\"}";
+                return;
+            }
+            if (preg_match("/^[1-9]\d*$/", $inputs["id"] ??"") != 1) {
+                echo "{ \"type\": \"error\", \"message\": \"Invalid integer.\"";
+                return;
+            }
+            try {
+                $query = "DELETE FROM borrowings WHERE `borrow_id` = ?";
+                $stmt = $conn->prepare($query);
+                $stmt->bindParam(1, $inputs["id"]);
+                if ($stmt->execute()) {
+                    echo "{\"type\": \"success\"}";
+                } else {
+                    echo "{\"type\": \"error\", \"message\": \"Couldn't delete row.\"}";
+                }
+            } catch (PDOException $e) {
+                echo "{\"type\": \"error\", \"message\": \"".$e->getMessage()."\"}";
+            } 
+            break;
         default:
             echo "{ \"type\": \"error\", \"message\": \"Invalid request\" }";
             break;

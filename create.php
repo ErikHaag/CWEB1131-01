@@ -13,22 +13,38 @@ $regexes = [
     "b_usage_location" => "/^(Classroom|Home|Lab|Library|Office)$/",
     "b_status" => "/^(Borrowed|Returned|Overdue)$/"
 ];
+
+function sanitize(&$strings) {
+    // use pass by reference to modify the given array
+    $errors = [];
+    foreach ($strings as $key => &$value) {
+        $value = str_replace(";", "", $value);
+        $value = htmlspecialchars($value);
+        $value = stripslashes($value);
+        $value = trim($value);
+        if (strlen($value) == 0) {
+            $errors[$key] = "Was reduced to spaces!";
+        }
+    }
+    unset($value);
+    return $errors;
+}
+
 $users = getAllData($conn, "SELECT user_id, full_name FROM users");
 $items = getAllData($conn, "SELECT item_id, item_name FROM items");
 
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    //create inputs
+    $inputs = [$_POST["user"] ?? "", $_POST["itemBorrowed"] ?? "", $_POST["dateBorrowed"] ?? "", $_POST["dateDue"] ?? "", $_POST["usageLoc"] ?? "", $_POST["status"] ?? ""];
+    // print_r($inputs);
     //Sanitize
+    $errors = sanitize($inputs);
+    if (count($errors) == 0) {
+        //Check
 
-    //convert to YMD
-    $dateBorrowed = explode("-", $_POST["dateBorrowed"] ?? "");
-    $dateBorrowed = [$dateBorrowed[2] ?? "", $dateBorrowed[0] ?? "", $dateBorrowed[1] ?? ""];
-    $dateBorrowed = implode("-", $dateBorrowed);
-    $dateDue = explode("-", $_POST["dateDue"] ?? "");
-    $dateDue = [$dateDue[2] ?? "", $dateDue[0] ?? "", $dateDue[1] ?? ""];
-    $dateDue = implode("-", $dateDue);
-    //Check
-    //Execute
+        //Execute
+    }
 }
 
 
@@ -65,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     }
                     ?>
                 </select>
-                <p><?php echo $errors["user_id"] ?? "";?></p>
+                <p><?php echo $errors["user"] ?? "";?></p>
                 <label for="itemBorrowed">Item Borrowed</label>
                 <select id="itemBorrowed" name="itemBorrowed">
                     <option value="" selected>Please select an option...</option>
@@ -77,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     }
                     ?>
                 </select>
-                <p><?php echo $errors["item_id"] ?? "";?></p>
+                <p><?php echo $errors["item"] ?? "";?></p>
                 <label for="dateBorrowed">Date borrowed</label>
                 <input id="dateBorrowed" name="dateBorrowed" type="date">
                 <p></p>

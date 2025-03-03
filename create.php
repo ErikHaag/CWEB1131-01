@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             // execute it
             if ($stmt->execute()) {
                 // send them back to index
-                header("Location: index.html");
+                header("Location: index.html?message=1");
             }  else {
                 $errors["generic"] = "Couldn't insert data.";
             }

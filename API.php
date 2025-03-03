@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             $value = stripslashes($value);
             $value = trim($value);
             if (strlen($value) == 0) {
-                $errors[$key] = "Was reduced to spaces!";
+                $errors[$key] = "$key was reduced to spaces!";
             }
         }
         unset($value);

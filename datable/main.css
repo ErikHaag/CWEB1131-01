@@ -5,8 +5,38 @@
 
 button {
     font-size: medium;
-    margin: 0px 5px;
-    padding: 5px;
+    margin: 0px 3px;
+    padding: 2px;
+    border-radius: 5px;
+    border-style: outset;
+    border-width: 5px;
+    box-shadow: 5px 5px lightgray;
+}
+
+button.read {
+    background-color: aqua;
+    border-color: hwb(180 0% 30%);
+}
+
+button.edit {
+    background-color: hwb(45deg 0% 0%);
+    border-color: hwb(45deg 0% 30%);
+}
+
+button.delete {
+    background-color: hwb(0deg 0% 30%);
+    border-color: hwb(0deg 0% 50%);
+    color: white;
+}
+
+#previous, #next {
+    background-color: slateblue;
+    border-color: hwb(248 35% 30%);
+}
+
+button:active {
+    border-style: inset;
+    box-shadow: none;
 }
 
 #pageNumber {
@@ -15,7 +45,7 @@ button {
     font-size: larger;
 }
 
-div.row{
+div.row {
     display: flex;
 }
 
@@ -30,7 +60,8 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
     border: 1px black solid;
     padding: 5px;
     text-align: center;

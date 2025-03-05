@@ -6,6 +6,8 @@ const pageNumber = document.getElementById("pageNumber");
 const search = document.getElementById("search");
 const rowsSelect = document.getElementById("rows");
 
+    let rows = [];
+
 let sort = {
     column: "id",
     direction: "asc",
@@ -48,7 +50,6 @@ function updateSort(col) {
 }
 
 async function updateTable() {
-    // table.innerHTML = "<td colspan=\"6\">Hang on...</td>";
     const response = await fetch("./API.php", {
         method: "POST",
         headers: {
@@ -68,6 +69,7 @@ async function updateTable() {
             table.innerHTML = "<td colspan=\"6\">No data :(</td>";
             return;
         }
+        rows = reply.data;
         let tableHTML = ""
         for (const row of reply.data) {
             tableHTML += "<tr>";
@@ -77,9 +79,9 @@ async function updateTable() {
                 tableHTML += "</td>";
             }
             tableHTML += "<td>";
-            tableHTML += "<button id=\"read" + row.customerID + "\" class=\"\">Read</button>";
-            tableHTML += "<button id=\"edit" + row.customerID + "\" class=\"\">Edit</button>";
-            tableHTML += "<button id=\"delete" + row.customerID + "\" class=\"\">Delete</button>";
+            tableHTML += "<button id=\"read" + row.customerID + "\" class=\"read\">Read</button>";
+            tableHTML += "<button id=\"edit" + row.customerID + "\" class=\"edit\">Edit</button>";
+            tableHTML += "<button id=\"delete" + row.customerID + "\" class=\"delete\">Delete</button>";
             tableHTML += "</td>"
             tableHTML += "</tr>";
         }
@@ -89,11 +91,12 @@ async function updateTable() {
 
 document.addEventListener("click", (e) => {
     let el = document.elementFromPoint(e.x, e.y);
-    switch (el?.id ?? "") {
+    let buttonId = el?.id ?? "";
+    switch (buttonId) {
         case "name":
         case "email":
         case "address":
-            updateSort(el.id);
+            updateSort(buttonId);
             updateHeaders();
             updateTable();
             break;
@@ -110,6 +113,11 @@ document.addEventListener("click", (e) => {
             pageNumber.innerText = (++sort.page) + 1;
             updateTable();
             break;
+        default:
+            break;
+    }
+    if (buttonId.startsWith("read")) {
+
     }
 });
 
@@ -121,7 +129,7 @@ search.addEventListener("input", () => {
 });
 
 rowsSelect.addEventListener("change", () => {
-    sort.rows = rowsSelect.value;
+    sort.rows = Number(rowsSelect.value);
     sort.page = 0;
     pageNumber.innerText = "1";
     updateTable();

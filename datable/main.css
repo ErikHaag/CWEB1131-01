@@ -1,0 +1,51 @@
+:root {
+    --sort-arrow: hwb(20 40% 0%);
+    --sort-background: gold;
+}
+
+button {
+    font-size: medium;
+    margin: 0px 5px;
+    padding: 5px;
+}
+
+#pageNumber {
+    align-items: center;
+    display: flex;
+    font-size: larger;
+}
+
+div.row{
+    display: flex;
+}
+
+label {
+    align-items: center;
+    display: flex;
+    font-size: large;
+    margin: 0px 5px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px black solid;
+    padding: 5px;
+    text-align: center;
+}
+
+th.sortable {
+    background-color: var(--sort-background);
+}
+
+th.sortUp {
+    background-color: var(--sort-arrow);
+    background-image: linear-gradient(315deg, transparent 60%, var(--sort-background) 60%), linear-gradient(45deg, transparent 60%, var(--sort-background) 60%);
+}
+
+th.sortDown {
+    background-color: var(--sort-arrow);
+    background-image: linear-gradient(135deg, transparent 60%, var(--sort-background) 60%), linear-gradient(225deg, transparent 60%, var(--sort-background) 60%);
+}

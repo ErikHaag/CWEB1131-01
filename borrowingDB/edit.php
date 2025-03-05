@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 // send them back to index
                 header("Location: index.html?message=2");
             } else {
-                $errors["generic"] = "Couldn't insert data.";
+                $errors["generic"] = "Couldn't change data.";
             }
         } catch (PDOException $e) {
             $errors["generic"] = $e->getMessage();

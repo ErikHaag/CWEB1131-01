@@ -6,15 +6,66 @@ const pageNumber = document.getElementById("pageNumber");
 const search = document.getElementById("search");
 const rowsSelect = document.getElementById("rows");
 
-    let rows = [];
+let rows = [];
 
 let sort = {
+    requestType: "getData",
     column: "id",
     direction: "asc",
     page: 0,
     rows: 5,
     search: ""
 };
+
+async function deleteCustomer(id) {
+    const choice = await swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to recover this customer!",
+        icon: "warning",
+        showCancelButton: true,
+        cancelButtonColor: "#3085d6",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it"
+    });
+    if (!choice.isConfirmed) {
+        return;
+    } 
+    const response = await fetch("./API.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            requestType: "deleteCustomer",
+            id: id
+        })
+    });
+    let reply;
+    try {
+        reply = await response.json();
+    } catch (e) {
+        await swal.fire({
+            title: "Oops",
+            text: "An error occurred.",
+            icon: "error"
+        });
+        return;
+    }
+    if (reply.type == "success") {
+        await swal.fire({
+            title: "Success!",
+            text: "Successfully removed customer.",
+            icon: "success"
+        });
+        updateTable();
+    } else if (reply.type == "error") {
+        await swal.fire({
+            title: "Oops",
+            text: "An error occurred.",
+            icon: "error"
+        });
+    }
+}
 
 function updateHeaders() {
     if (sort.column == "name") {
@@ -116,8 +167,8 @@ document.addEventListener("click", (e) => {
         default:
             break;
     }
-    if (buttonId.startsWith("read")) {
-
+    if (buttonId.startsWith("delete")) {
+        deleteCustomer(Number(buttonId.substring(6)));
     }
 });
 

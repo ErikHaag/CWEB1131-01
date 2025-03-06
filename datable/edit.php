@@ -27,7 +27,7 @@ function sanitize(&$inputs)
 }
 
 $regexes = [
-    "address" => "/^[\d\w\-.]{2,65535}$/",
+    "address" => "/^[\d\w\-. ]{2,65535}$/",
     "email" => "/^[\w._]+@[\w._]+\.[\w]{2,6}$/",
     "name" => "/^[A-Z][a-z]*$/",
     "pos_int" => "/^[1-9]\d*$/"

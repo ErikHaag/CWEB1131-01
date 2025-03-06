@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errors["EMAIL"] = "Invalid email.";
         }
         if (preg_match($regexes["address"], $inputs["ADDRESS"]) != 1) {
-            $error["ADDRESS"] = "Invalid address.";
+            $errors["ADDRESS"] = "Invalid address.";
         }
     }
     if (count($errors) == 0) {

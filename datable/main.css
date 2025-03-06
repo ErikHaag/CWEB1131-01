@@ -3,7 +3,12 @@
     --sort-background: gold;
 }
 
-button {
+a {
+    text-decoration: none;
+}
+
+.btn {
+    display: inline-block;
     font-size: medium;
     margin: 0px 3px;
     padding: 2px;
@@ -13,19 +18,20 @@ button {
     box-shadow: 5px 5px lightgray;
 }
 
-button.read {
+/* button.read {
     background-color: aqua;
     border-color: hwb(180 0% 30%);
-}
+} */
 
-button.edit {
-    background-color: hwb(45deg 0% 0%);
-    border-color: hwb(45deg 0% 30%);
+.edit {
+    color: black;
+    background-color: hwb(45 0% 0%);
+    border-color: hwb(45 0% 30%);
 }
 
 button.delete {
-    background-color: hwb(0deg 0% 30%);
-    border-color: hwb(0deg 0% 50%);
+    background-color: hwb(0 0% 30%);
+    border-color: hwb(0 0% 50%);
     color: white;
 }
 
@@ -34,7 +40,13 @@ button.delete {
     border-color: hwb(248 35% 30%);
 }
 
-button:active {
+#create {
+    color: black;
+    background-color: lime;
+    border-color: hwb(120 0% 30%);
+}
+
+.btn:active {
     border-style: inset;
     box-shadow: none;
 }
@@ -45,8 +57,26 @@ button:active {
     font-size: larger;
 }
 
+div.column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 div.row {
     display: flex;
+}
+
+div.separate {
+    display: flex;
+}
+
+.ml-5 {
+    margin-left: 50px;
+}
+
+.mr-5 {
+    margin-right: 50px;
 }
 
 label {

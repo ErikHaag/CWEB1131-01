@@ -79,9 +79,9 @@ async function updateTable() {
                 tableHTML += "</td>";
             }
             tableHTML += "<td>";
-            tableHTML += "<button id=\"read" + row.customerID + "\" class=\"read\">Read</button>";
-            tableHTML += "<button id=\"edit" + row.customerID + "\" class=\"edit\">Edit</button>";
-            tableHTML += "<button id=\"delete" + row.customerID + "\" class=\"delete\">Delete</button>";
+            // tableHTML += "<button id=\"read" + row.customerID + "\" class=\"read\">Read</button>";
+            tableHTML += "<a href=\"edit.php?id=" + row.customerID + "\" class=\"btn edit\">Edit</a>";
+            tableHTML += "<button id=\"delete" + row.customerID + "\" class=\"btn delete\">Delete</button>";
             tableHTML += "</td>"
             tableHTML += "</tr>";
         }

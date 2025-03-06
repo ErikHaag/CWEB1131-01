@@ -14,9 +14,4 @@ try {
     }
     return;
 }
-
-function getAllData($c, $query) {
-    $stmt = $c->query($query);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 ?>

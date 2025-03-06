@@ -1,0 +1,31 @@
+div.threecol {
+    display: grid;
+    grid-template-columns: auto auto auto;
+}
+
+#back {
+    color: black;
+    background-color: aqua;
+    border-color: hwb(180 0% 30%);
+}
+
+p {
+    margin: 0px;
+}
+
+.mt-5 {
+    margin-top: 5px;
+}
+
+div>p.error:not(:empty) {
+    margin-left: 10px;
+}
+
+label {
+    margin: 5px 0px;
+}
+
+#submit {
+    background-color: lime;
+    border-color: hwb(120 0% 30%);
+}

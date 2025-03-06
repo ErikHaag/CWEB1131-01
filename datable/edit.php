@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (strlen($inputs["EMAIL"]) > 100 || preg_match($regexes["email"], $inputs["EMAIL"]) != 1) {
             $errors["EMAIL"] = "Invalid email.";
         }
-        if (preg_match($regexes["address"], $inputs["ADDRESS"])) {
+        if (preg_match($regexes["address"], $inputs["ADDRESS"]) != 1) {
             $error["ADDRESS"] = "Invalid address.";
         }
     }

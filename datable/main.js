@@ -10,62 +10,14 @@ let rows = [];
 
 let sort = {
     requestType: "getData",
+    userID: userID,
+    password: password,
     column: "id",
     direction: "asc",
     page: 0,
     rows: 5,
     search: ""
 };
-
-async function deleteCustomer(id) {
-    const choice = await swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to recover this customer!",
-        icon: "warning",
-        showCancelButton: true,
-        cancelButtonColor: "#3085d6",
-        confirmButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it"
-    });
-    if (!choice.isConfirmed) {
-        return;
-    } 
-    const response = await fetch("./API.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            requestType: "deleteCustomer",
-            id: id
-        })
-    });
-    let reply;
-    try {
-        reply = await response.json();
-    } catch (e) {
-        await swal.fire({
-            title: "Oops",
-            text: "An error occurred.",
-            icon: "error"
-        });
-        return;
-    }
-    if (reply.type == "success") {
-        await swal.fire({
-            title: "Success!",
-            text: "Successfully removed customer.",
-            icon: "success"
-        });
-        updateTable();
-    } else if (reply.type == "error") {
-        await swal.fire({
-            title: "Oops",
-            text: "An error occurred.",
-            icon: "error"
-        });
-    }
-}
 
 function updateHeaders() {
     if (sort.column == "name") {
@@ -123,18 +75,7 @@ async function updateTable() {
         rows = reply.data;
         let tableHTML = ""
         for (const row of reply.data) {
-            tableHTML += "<tr>";
-            for (const col of ["customerID", "storeID", "name", "email", "address"]) {
-                tableHTML += "<td>";
-                tableHTML += row[col];
-                tableHTML += "</td>";
-            }
-            tableHTML += "<td>";
-            // tableHTML += "<button id=\"read" + row.customerID + "\" class=\"read\">Read</button>";
-            tableHTML += "<a href=\"edit.php?id=" + row.customerID + "\" class=\"btn edit\">Edit</a>";
-            tableHTML += "<button id=\"delete" + row.customerID + "\" class=\"btn delete\">Delete</button>";
-            tableHTML += "</td>"
-            tableHTML += "</tr>";
+            tableHTML += createRow(row);
         }
         table.innerHTML = tableHTML;
     }

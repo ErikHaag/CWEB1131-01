@@ -1,38 +1,11 @@
 <?php
-include "config/dbconfig.php";
-
-function filter_assoc($subject, $keys)
-{
-    foreach ($subject as $key => $value) {
-        if (!in_array($key, $keys)) {
-            unset($subject[$key]);
-        }
-    }
-    return $subject;
+require "config/dbconfig.php";
+session_start();
+$role = get_role($_SESSION["user_id"] ?? "", $_SESSION["password"] ?? "");
+if ($role == "") {
+    header("Location: index.php");
+    exit();
 }
-
-function sanitize(&$inputs)
-{
-    $errors = [];
-    foreach ($inputs as $key => &$value) {
-        $value = str_replace(";", "", $value);
-        $value = htmlspecialchars($value);
-        $value = stripslashes($value);
-        $value = trim($value);
-        if (strlen($value) == 0) {
-            $errors[$key] = $key . " was reduced to spaces!";
-        }
-    }
-    return $errors;
-}
-
-$regexes = [
-    "address" => "/^[\d\w\-. ]{2,65535}$/",
-    "email" => "/^[\w._]+@[\w._]+\.[\w]{2,6}$/",
-    "name" => "/^[A-Z][a-z]*$/",
-    "pos_int" => "/^[1-9]\d*$/"
-];
-
 $errors = [];
 $success = false;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -102,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Create customer</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='dashboard.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='form.css'>
 </head>
 
@@ -132,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <p class="error"><?php echo $errors["ADDRESS"] ?? ""; ?></p>
                 </div>
                 <div class="mt-5">
-                    <a href="./index.html" id="back" class="btn">Go back</a>
+                    <a href="dashboard.php" id="back" class="btn">Go back</a>
                     <input id="submit" class="btn" type="submit">
                 </div>
                 <p class="messages"><?php echo $success ? "Customer has been added." : ""; ?></p>

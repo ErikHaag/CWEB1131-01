@@ -1,35 +1,40 @@
 <?php
-include "config/dbconfig.php";
+require "config/dbconfig.php";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // get the body of fetch()
     $requestBody = json_decode(file_get_contents('php://input'), true);
+    $role = get_role($requestBody["userID"] ?? "", $requestBody["password"] ?? "");
+    if ($role == "") {
+        echo "{\"type\": \"error\", \"message\": \"Invalid username or password.\"}";
+        exit();
+    }
     switch ($requestBody["requestType"]) {
         case "getData":
             //ensure correct types
             if (!(is_string($requestBody["column"]) && is_string($requestBody["direction"]) && is_integer($requestBody["page"]) && is_integer($requestBody["rows"]) && is_string($requestBody["search"]))) {
-                echo "{\"type\": \"error\", \"message\": \"Invalid variable types\"}";
-                return;
+                echo "{\"type\": \"error\", \"message\": \"Invalid variable types.\"}";
+                exit();
             }
             //input vailidation
             if (preg_match("/^(id|name|email|address)$/", $requestBody["column"]) != 1) {
                 echo "{\"type\": \"error\", \"message\": \"Invalid sorting column.\"}";
-                return;
+                exit();
             }
             if (preg_match("/^(asc|desc)$/", $requestBody["direction"]) != 1) {
                 echo "{\"type\": \"error\", \"message\": \"Invalid sorting direction.\"}";
-                return;
+                exit();
             }
             if ($requestBody["page"] < 0) {
                 echo "{\"type\": \"error\", \"message\": \"Invalid page number.\"}";
-                return;
+                exit();
             }
             if ($requestBody["rows"] != 5 && $requestBody["rows"] != 10 && $requestBody["rows"] != 20) {
                 echo "{\"type\": \"error\", \"message\": \"Invalid row quantity.\"}";
-                return;
+                exit();
             }
             if (preg_match("/^(|(n:[A-Za-z]+( [A-Za-z]*)?)|e:([\w.-]+)?(@[\w.-]+)?(\.[A-Za-z]{2,6})?|a:[\w. ]+)$/", $requestBody["search"]) != 1) {
                 echo "{\"type\": \"error\", \"message\": \"Invalid search query.\"}";
-                return;
+                exit();
             }
             //we should be safe
             $query = "SELECT CUSTOMER_ID, STORE_ID, CONCAT(FIRST_NAME, \" \", LAST_NAME) AS FULL_NAME, EMAIL, ADDRESS FROM customers";
@@ -71,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             } catch (Exception $e) {
                 echo "{\"type\": \"error\", \"message\": \"An unexpected error occured when try to execute the query.\n" . $e->getMessage() . "\"}";
-                return;
+                exit();
             }
             // print_r($rows);
             foreach ($rows as &$row) {
@@ -85,21 +90,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "}";
             break;
         case "deleteCustomer":
-            if (is_int($requestBody["id"]) && $requestBody["id"] >= 1) {
-                try {
-                    $query = "DELETE FROM customers WHERE CUSTOMER_ID = ? LIMIT 1";
-                    $stmt = $conn->prepare($query);
-                    $stmt->bindValue(1, $requestBody["id"], PDO::PARAM_INT);
-                    if ($stmt->execute()) {
-                        echo "{\"type\": \"success\", \"message\": \"Customer has been successfully removed.\"}";
-                    } else {
-                        echo "{\"type\": \"error\", \"message\": \"An error occurred when processing your request.\"}";
-                    }
-                } catch (Exception $e) {
+            if ($role != "super_admin") {
+                echo "{\"type\": \"error\", \"message\": \"Insufficent permission.\"}";
+                exit();
+            }
+            if (!is_int($requestBody["id"]) || $requestBody["id"] < 1) {
+                echo "{\"type\": \"error\", \"message\": \"Invalid ID.\"}";
+                exit();
+            }
+            try {
+                $query = "DELETE FROM customers WHERE CUSTOMER_ID = ? LIMIT 1";
+                $stmt = $conn->prepare($query);
+                $stmt->bindValue(1, $requestBody["id"], PDO::PARAM_INT);
+                if ($stmt->execute()) {
+                    echo "{\"type\": \"success\", \"message\": \"Customer has been successfully removed.\"}";
+                } else {
                     echo "{\"type\": \"error\", \"message\": \"An error occurred when processing your request.\"}";
                 }
-            } else {
-                echo "{\"type\": \"error\", \"message\": \"Invalid ID.\"}";
+            } catch (Exception $e) {
+                echo "{\"type\": \"error\", \"message\": \"An error occurred when processing your request.\"}";
             }
             break;
         default:

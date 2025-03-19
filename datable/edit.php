@@ -1,72 +1,42 @@
 <?php
-include "config/dbconfig.php";
-
-function filter_assoc($subject, $keys)
-{
-    foreach ($subject as $key => $value) {
-        if (!in_array($key, $keys)) {
-            unset($subject[$key]);
-        }
-    }
-    return $subject;
+require "config/dbconfig.php";
+session_start();
+$role = get_role($_SESSION["user_id"] ?? "", $_SESSION["password"] ?? "");
+if ($role != "admin" && $role != "super_admin") {
+    header("Location: index.php");
+    exit();
 }
-
-function sanitize(&$inputs)
-{
-    $errors = [];
-    foreach ($inputs as $key => &$value) {
-        $value = str_replace(";", "", $value);
-        $value = htmlspecialchars($value);
-        $value = stripslashes($value);
-        $value = trim($value);
-        if (strlen($value) == 0) {
-            $errors[$key] = $key . " was reduced to spaces!";
-        }
-    }
-    return $errors;
-}
-
-$regexes = [
-    "address" => "/^[\d\w\-. ]{2,65535}$/",
-    "email" => "/^[\w._]+@[\w._]+\.[\w]{2,6}$/",
-    "name" => "/^[A-Z][a-z]*$/",
-    "pos_int" => "/^[1-9]\d*$/"
-];
-
 $errors = [];
 $success = false;
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     $inputs = filter_assoc($_GET, ["id"]);
     $errors = sanitize($inputs);
-    if (count($errors) == 0) {
-        if (preg_match($regexes["pos_int"], $inputs["id"]) != 1) {
-            echo "That's not a valid id!";
-            return;
-        }
-        $inputs["id"] = (int) $inputs["id"];
-        try {
-            $query = "SELECT STORE_ID, FIRST_NAME, LAST_NAME, EMAIL, ADDRESS FROM customers WHERE CUSTOMER_ID = ? LIMIT 0,1";
-            $stmt = $conn->prepare($query);
-            $stmt->bindValue(1, $inputs["id"], PDO::PARAM_INT);
-            if ($stmt->execute()) {
-                if ($stmt->rowCount() == 1) {
-                    $fill = $stmt->fetch(PDO::FETCH_ASSOC);
-                    $fill["CUSTOMER_ID"] = $inputs["id"];
-                } else {
-                    echo "That ID doesn't exist in our database!";
-                    return;
-                }
+    if (!empty($errors) || preg_match($regexes["pos_int"], $inputs["id"]) != 1) {
+        echo "Invalid Id.";
+        exit();
+    }
+    $inputs["id"] = (int) $inputs["id"];
+    try {
+        $query = "SELECT STORE_ID, FIRST_NAME, LAST_NAME, EMAIL, ADDRESS FROM customers WHERE CUSTOMER_ID = ? LIMIT 0,1";
+        $stmt = $conn->prepare($query);
+        $stmt->bindValue(1, $inputs["id"], PDO::PARAM_INT);
+        if ($stmt->execute()) {
+            if ($stmt->rowCount() == 1) {
+                $fill = $stmt->fetch(PDO::FETCH_ASSOC);
+                $fill["CUSTOMER_ID"] = $inputs["id"];
             } else {
-                echo "An error occurred when processing your request.";
+                echo "That ID doesn't exist in our database!";
                 return;
             }
-        } catch (Exception $e) {
-            echo "An error occurred when processing your request.\n" . $e->getMessage();
+        } else {
+            echo "An error occurred when processing your request.";
             return;
         }
+    } catch (Exception $e) {
+        echo "An error occurred when processing your request.\n" . $e->getMessage();
+        return;
     }
-}
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+} else if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $query = "SELECT DISTINCT STORE_ID from customers";
         $stmt = $conn->prepare($query);
@@ -140,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Edit customer</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='dashboard.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='form.css'>
 </head>
 
@@ -171,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <p class="error"><?php echo $errors["ADDRESS"] ?? ""; ?></p>
                 </div>
                 <div class="mt-5">
-                    <a href="./index.html" id="back" class="btn">Go back</a>
+                    <a href="dashboard.php" id="back" class="btn">Go back</a>
                     <input id="submit" class="btn" type="submit">
                 </div>
                 <p class="messages"><?php echo $success ? "Customer has been changed." : ""; ?></p>

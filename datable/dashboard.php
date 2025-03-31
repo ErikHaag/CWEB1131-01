@@ -79,7 +79,7 @@ if ($role == "") {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const userID = <?php echo $_SESSION["user_id"]; ?>;
-    const password = "<?php echo addslashes($_SESSION["password"]); ?>";
+    const password = "<?=json_encode($_SESSION["password"], JSON_THROW_ON_ERROR);?>";
 
     function createRow(row) {
         let rowHTML = "<tr>";

@@ -9,7 +9,8 @@ def index():
 
 @read_bp.route("/students")
 def students():
-    return render_template("table.html")
+    data=get_all_students()
+    return render_template("table.html", all_students=data)
 
 # I figured out how to do an API, I forgot the methods argument...
 # @read_bp.route("/api", methods=["POST"])

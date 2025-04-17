@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from models.student import get_all_students
 
 read_bp = Blueprint('read_student', __name__)
@@ -9,4 +9,9 @@ def index():
 
 @read_bp.route("/students")
 def students():
-    return render_template("table.html", all_students=get_all_students())
+    return render_template("table.html")
+
+# I figured out how to do an API, I forgot the methods argument...
+# @read_bp.route("/api", methods=["POST"])
+# def api():
+#     return request.get_json()

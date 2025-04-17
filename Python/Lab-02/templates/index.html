@@ -13,16 +13,7 @@
 <body>
     <div class="container mt-5">
         <h2 class="mb-4">Student management</h2>
-        {% with flash_messages = get_flashed_messages(with_categories=True) %}
-        {% if flash_messages %}
-        {% for category, message in flash_messages %}
-        <div class="alert alert-{{category}} alert-dismissable fade show mt-3" role="alert">
-            {{message}}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+        {% include "flash_alerts.html" %}
         <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#createStudentModal">Add
             Student</button>
 

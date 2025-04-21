@@ -34,15 +34,37 @@
                     <td>{{ student.program }}</td>
                     <td>{{ student.enrollment_date }}</td>
                     <td>
-                    <!-- Edit Trigger -->
+                        <!-- Edit Trigger -->
                         <a class="btn btn-warning btn-sm" href="/edit/{{student._id}}">Edit</button>
-                    <!-- Delete Trigger -->
-                    <!-- <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ student._id }}">Delete</button> -->
+                            <!-- Delete Trigger -->
+                            <a class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#deleteModal{{student._id}}">Delete</button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% for student in all_students %}
+        <div class="modal fade" id="deleteModal{{student._id}}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Confirm deletion</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- A Minecraft reference in an assignment? More likely than you think. -->
+                        <p>Are you sure you want to delete {{student.name}}?<br>The entry will be gone forever (A long time!)
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" style="font-weight: bold;">No</button>
+                        <a class="btn btn-danger" href="/delete/{{student._id}}">Yes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
 </body>
 
 </html>

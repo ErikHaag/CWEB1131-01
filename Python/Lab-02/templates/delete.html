@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Delete {{name}}</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Confirm deletion</h2>
+        <!-- A Minecraft reference in an assignment? More likely than you think. -->
+        <p>Are you sure you want to delete {{name}}?<br>The entry will be gone forever (A long time!)</p>
+        <a class="btn btn-secondary" href="/students" style="font-weight: bold;">No</a>
+        <a class="btn btn-danger" href="/confirmDelete/{{id}}">Yes</a>
+    </div>
+</body>
+</html>

@@ -70,5 +70,33 @@
         return $errors;
     }
 
+    function get_role($conn) {
+        if (empty($_SESSION)) {
+            return [-1, "none"];
+        }
+        $id = $_SESSION["id"];
+        if (!is_int($id) || $id < 0) {
+            return [-1, "none"];
+        }
+        $query = "SELECT username, password, role FROM user_credentials WHERE id = ? LIMIT 1";
+        $stmt = $conn->prepare($query);
+        $stmt->bindValue(1, $id, PDO::PARAM_INT);
+        if (!$stmt->execute()) {
+            return [-2, "none"];
+        }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            password_verify("hi", "$2y\$13\$f1234567890123456789012345678901234567890123456789012");
+            return [-1, "none"];
+        }
+        if ($_SESSION["username"] != $row["username"]) {
+            password_verify("hi", "$2y\$13\$f1234567890123456789012345678901234567890123456789012");
+            return [-1, "none"];
+        }
+        if (password_verify($_SESSION["password"], $row["password"])) {
+            return [$id, $row["role"]];
+        }
+        return [-1, "none"];
+    }
 
 ?>

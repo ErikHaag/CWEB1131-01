@@ -7,10 +7,11 @@ try {
     $conn = new PDO("mysql:host={$host}; dbname={$dbName};", $userName, $password);
 } catch (Exception $e) {
     if (isset($outputJSON)) {
-        echo "{\"type\": \"error\", \"message\": \"An error occurred! " . $e->getMessage() . "\"";
+        echo "{\"type\": \"error\", \"messages\": [\"Unable to connect to the database.\"]}";
     } else {
-        echo "Error: " . $e->getMessage();
+        echo "Unable to connect to the database.";
     }
-    exit("Unable to connect to database");
+    http_response_code(503);
+    exit();
 }
 ?>

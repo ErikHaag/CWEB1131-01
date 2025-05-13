@@ -1,5 +1,6 @@
 <?php
 session_start();
+// toss the session in the garbage
 $_SESSION = [];
 session_unset();
 session_destroy();

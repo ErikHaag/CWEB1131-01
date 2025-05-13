@@ -7,6 +7,8 @@ require "utils.php";
 $genericMessages = [];
 $loginErrors = [];
 $registerErrors = [];
+$hasLoginErrors = false;
+$hasRegisterErrors = false;
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if ($_POST["formType"] == "login") {
         $input = [];
@@ -37,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 goto fail;
             }
 
-            $row["id"] = (int)$row["id"];
+            $row["id"] = (int) $row["id"];
             if (password_needs_rehash($input["password"], PASSWORD_DEFAULT, ["cost" => 13])) {
                 // Rehash user's password if better methods are implemented
                 $rehashed = password_hash($input["password"], PASSWORD_DEFAULT, ["cost" => 13]);
@@ -46,15 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     $stmt = $conn->prepare($query);
                     $stmt->bindValue(1, $rehashed);
                     $stmt->bindValue(2, $row["id"], PDO::PARAM_INT);
-                    if ($stmt->execute()) {
-                        $input["password"] = $rehashed;
-                    }
+                } catch (Exception $e) {
+                    // oh well...
                 }
             }
 
             session_start();
-            $_SESSION["id"] = $row["id"];
-            // todo: store a uuid in another database table instead of their username and unhashed password.
+            // not the most secure thing, I wish the documentation was a little clearer on how to deal with regenerate_session_id().
             $_SESSION["username"] = $input["username"];
             $_SESSION["password"] = $input["password"];
             header("Location: dashboard.php");
@@ -206,15 +206,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <body>
     <div class="container mt-5">
         <?php
-            if (count($genericMessages) > 0) {
-                echo "<div class=\"alert alert-dark\">";
-                foreach ($genericMessages as $message) {
-                    echo "<p>";
-                    echo $message;
-                    echo "</p>";
-                }
-                echo "</div>";
+        if (count($genericMessages) > 0) {
+            echo "<div class=\"alert alert-dark\">";
+            foreach ($genericMessages as $message) {
+                echo "<p>";
+                echo $message;
+                echo "</p>";
             }
+            echo "</div>";
+        }
         ?>
         <ul class="nav justify-content-center">
             <li class="nav-item">
@@ -227,19 +227,19 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         <div class="border border-3 rounded p-2">
             <div id="loginContainer">
                 <?php
-                    if ($hasLoginErrors) {
-                        echo "<div class=\"alert alert-danger\">";
-                        echo "Oops...";
-                        echo "<ul>";
-                        foreach ($loginErrors as $error) {
-                            echo "<li>";
-                            echo $error;
-                            echo "</li>";
-                        }
-                        echo "</ul>";
-                        echo "</div>";
+                if ($hasLoginErrors) {
+                    echo "<div class=\"alert alert-danger\">";
+                    echo "Oops...";
+                    echo "<ul>";
+                    foreach ($loginErrors as $error) {
+                        echo "<li>";
+                        echo $error;
+                        echo "</li>";
                     }
-                
+                    echo "</ul>";
+                    echo "</div>";
+                }
+
                 ?>
                 <form method="post">
                     <input type="hidden" name="formType" value="login">

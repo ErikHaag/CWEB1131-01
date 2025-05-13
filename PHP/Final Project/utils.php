@@ -53,6 +53,39 @@
                         $errors[] = "Password must contain printable ASCII characters, excluding spaces.";
                     }
                     break;
+                case "sortColumn":
+                    if ($value != "id" && $value != "email" && $value != "name" && $value != "username") {
+                        $errors[] = "Invalid column to sort.";
+                    }
+                    break;
+                case "sortDir":
+                    if ($value != "asc" && $value != "desc") {
+                        $errors[] = "Invalid sort direction.";
+                    }
+                    break;
+                case "query":
+                    if (str_starts_with($value, "e:")) {
+                        if ($len > 52) {
+                            $errors[] = "Email query is too long.";
+                        } elseif (preg_match("/^(?:[\w.]+|[\w.]+@|[\w.]*@[\w.]+(?:\.[A-Za-z0-9]+)?)$/", substr($value, 2)) != 1) {
+                            $errors[] = "Email query has improper form.";
+                        }
+                    } elseif (str_starts_with($value, "n:")) {
+                        if ($len > 103) {
+                            $errors[] = "Name query is too long.";
+                        } elseif (preg_match("/^[A-Z]?[a-z]*(?: [A-Z][a-z]*)?$/", substr($value, 2)) != 1) {
+                            $errors[] = "Name query has improper form.";
+                        }
+                    } elseif (str_starts_with($value, "u:")) {
+                        if ($len > 32) {
+                            $errors[] = "Username query is too long.";
+                        } elseif (preg_match("/^[\w\-]{1,30}$/", substr($value, 2)) != 1) {
+                            $errors[] = "Username query has improper form.";                            
+                        }
+                    } elseif ($value != "") {
+                        $errors[] = "Invalid query header, only e:<email>, n:<name>, and u:<username> are valid.";
+                    }
+                    break;
                 case "username":
                     if ($len > 30) {
                         $errors[] = "Username can't have more than 30 characters";
@@ -70,17 +103,10 @@
         return $errors;
     }
 
-    function get_role($conn) {
-        if (empty($_SESSION)) {
-            return [-1, "none"];
-        }
-        $id = $_SESSION["id"];
-        if (!is_int($id) || $id < 0) {
-            return [-1, "none"];
-        }
-        $query = "SELECT username, password, role FROM user_credentials WHERE id = ? LIMIT 1";
+    function get_role($conn, $username, $password) {
+        $query = "SELECT id, password, role FROM user_credentials WHERE username = ? LIMIT 1";
         $stmt = $conn->prepare($query);
-        $stmt->bindValue(1, $id, PDO::PARAM_INT);
+        $stmt->bindValue(1, $username);
         if (!$stmt->execute()) {
             return [-2, "none"];
         }
@@ -89,12 +115,8 @@
             password_verify("hi", "$2y\$13\$f1234567890123456789012345678901234567890123456789012");
             return [-1, "none"];
         }
-        if ($_SESSION["username"] != $row["username"]) {
-            password_verify("hi", "$2y\$13\$f1234567890123456789012345678901234567890123456789012");
-            return [-1, "none"];
-        }
-        if (password_verify($_SESSION["password"], $row["password"])) {
-            return [$id, $row["role"]];
+        if (password_verify($password, $row["password"])) {
+            return [$row["id"], $row["role"]];
         }
         return [-1, "none"];
     }

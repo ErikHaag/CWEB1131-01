@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 if (!$stmt->execute()) {
                     goto removeUser;
                 }
-                echo "Success";
+                $genericMessages[] = "Registered successfully.";
             } catch (Exception $e) {
                 removeUser:
                 // uh oh, we couldn't add the details, let's remove the credentials to avoid a desync.
@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     <div class="container mt-5">
         <?php
         if (count($genericMessages) > 0) {
-            echo "<div class=\"alert alert-dark\">";
+            echo "<div class=\"alert alert-info\">";
             foreach ($genericMessages as $message) {
                 echo "<p>";
                 echo $message;

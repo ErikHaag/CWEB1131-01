@@ -79,4 +79,4 @@ document.addEventListener("change", (e) => {
     } else {
         e.target.classList.add("error");
     }
-})
+});

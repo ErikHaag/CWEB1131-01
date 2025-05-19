@@ -1,6 +1,8 @@
 const alertDiv = document.getElementById("alerts");
 const currentUserTable = document.getElementById("selfTable");
 const table = document.getElementById("table");
+const pageDisplay = document.getElementById("pageNumber");
+
 
 const getUserRequestBody = {
     username: username,
@@ -12,6 +14,10 @@ const getUserRequestBody = {
     rows: 5,
     page: 0
 };
+
+let lastPage = 0;
+
+const updatePageDisp = () => {pageDisplay.innerText = (getUserRequestBody.page + 1) + "/" + (lastPage + 1);};
 
 async function updateUser() {
     let response = await fetch("./api.php", {
@@ -59,8 +65,6 @@ async function updateUser() {
     }
 }
 
-updateUser();
-
 async function updateTable() {
     table.innerHTML = "<td id=\"loadingTd\" colspan=\"3\"></td>";
     requestAnimationFrame(loadingAnimation);
@@ -74,7 +78,8 @@ async function updateTable() {
     let data = await response.json();
     switch (response.status) {
         case 200:
-            getUserRequestBody.page = Math.min(getUserRequestBody.page, data.lastPage);
+            lastPage = data.lastPage;
+            getUserRequestBody.page = Math.min(getUserRequestBody.page, lastPage);
             if (data.rows.length == 0) {
                 table.innerHTML = "<tr><td colspan=\"3\">No data :(</td></tr>"
             } else {
@@ -83,9 +88,10 @@ async function updateTable() {
                     tableHTML += `<tr>
                         <td><img class="thumbnail" src="${r.icon}"></td>
                         <td>${r.username}</td>
-                        <td><ul><li>Name: ${r.name}</li><li>Email: ${r.email}</li></ul></td>
-                    </tr>`
+                        <td><ul><li>Name: ${r.name}</li><li>Email: ${r.email}</li></ul>${additionalButtons(r.username)}</td>
+                    </tr>`;
                 }
+                table.innerHTML = tableHTML;
             }
             break;
     }
@@ -137,4 +143,59 @@ function loadingAnimation() {
     requestAnimationFrame(loadingAnimation);
 }
 
-requestAnimationFrame(loadingAnimation);
+updateUser();
+updateTable();
+
+
+document.addEventListener("click", (e) => {
+    switch (e.target.id) {
+        case "prevPage":
+            if (getUserRequestBody.page >= 1) {
+                getUserRequestBody.page--;
+                updatePageDisp();
+                updateTable();
+            }
+            break;
+        case "nextPage":
+            if (getUserRequestBody.page < lastPage) {
+                getUserRequestBody.page++;
+                updatePageDisp();
+                updateTable();
+            }
+            break;
+        default:
+            handleAdditionalButtons(e.target.id);
+            break; 
+    }
+});
+
+document.addEventListener("change", (e) => {
+    switch (e.target.id) {
+        case "rowCount":
+            getUserRequestBody.rows = Number(e.target.value);
+            getUserRequestBody.page = 0;
+            updatePageDisp();
+            updateTable();
+            break;
+        case "query":
+            getUserRequestBody.query = e.target.value;
+            getUserRequestBody.page = 0;
+            updatePageDisp();
+            updateTable();
+            break;
+        case "sortCol":
+            getUserRequestBody.sortColumn = e.target.value;
+            getUserRequestBody.page = 0;
+            updatePageDisp();
+            updateTable();
+            break;
+        case "sortDir":
+            getUserRequestBody.sortDir = e.target.value;
+            getUserRequestBody.page = 0;
+            updatePageDisp();
+            updateTable();
+            break;
+        default:
+            break;
+    }
+});

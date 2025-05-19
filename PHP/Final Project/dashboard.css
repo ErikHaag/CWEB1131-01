@@ -12,3 +12,7 @@ tr>th{
 #loadingTd{
     text-align: center;
 }
+
+.expand-x {
+    width: max-content;
+}

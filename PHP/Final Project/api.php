@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $errors = validate($userData, ["username", "password"], ["", ""]);
 
     if (!empty($errors)) {
-        echo "{\"type\": \"error\", \"messages\": \"Invalid username or password\"}";
+        echo "{\"type\": \"error\", \"messages\": [\"Invalid username or password\"]}";
         http_response_code(401);
         exit();
     }
@@ -22,11 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($role == "none") {
         if ($id == -2) {
-            echo "{type: \"error\", \"messages\": \"Unable to validate identity.\"}";
+            echo "{type: \"error\", \"messages\": [\"Unable to validate identity.\"]}";
             // service unavailable
             http_response_code(503);
         } else {
-            echo "{type: \"error\", \"messages\": \"Invalid username or password\"}";
+            echo "{type: \"error\", \"messages\": [\"Invalid username or password\"]}";
             // unauthenticated
             http_response_code(401);
         }
@@ -97,13 +97,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             switch ($sortInfo["query"][0]) {
                 case "e":
-                    $queryModifiers = " AND c.email LIKE :query";
+                    $queryModifiers = " AND c.email LIKE :query ESCAPE '~'";
                     break;
                 case "n":
-                    $queryModifiers = " AND CONCAT(d.firstName, \" \", d.lastName) LIKE :query";
+                    $queryModifiers = " AND CONCAT(d.firstName, \" \", d.lastName) LIKE :query ESCAPE '~'";
                     break;
                 default:
-                    $queryModifiers = " AND c.username LIKE :query";
+                    $queryModifiers = " AND c.username LIKE :query ESCAPE '~'";
                     break;
             }
         }
@@ -113,7 +113,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("$countQuery $queryCombiner $queryExcludeUser$queryModifiers");
             $stmt->bindValue("id", $id, PDO::PARAM_INT);
             if ($hasQuery) {
-                $stmt->bindValue("query", "%" . substr($sortInfo["query"], 2) . "%");
+                // escape the underscore with a tilde
+                $stmt->bindValue("query", "%" . str_replace("_", "~_", substr($sortInfo["query"], 2)) . "%");
             }
             if (!$stmt->execute()) {
                 throw new Exception();
@@ -131,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // results query
             $queryModifiers .= match ($sortInfo["sortColumn"]) {
                 "email" => " ORDER BY c.email",
-                "name" => " ORDER BY d.name",
+                "name" => " ORDER BY CONCAT(d.firstName, \" \", d.lastName)",
                 "username" => " ORDER BY c.username",
                 default => " ORDER BY c.id"
             };
@@ -145,7 +146,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("$rowQuery $queryCombiner $queryExcludeUser$queryModifiers");
             $stmt->bindValue("id", $id, PDO::PARAM_INT);
             if ($hasQuery) {
-                $stmt->bindValue("query", "%" . substr($input["query"], 2) . "%");
+                // escape the underscore with a tilde
+                $stmt->bindValue("query", "%" . str_replace("_", "~_", substr($sortInfo["query"], 2)) . "%");
             }
             $stmt->bindValue("rows", $data["rows"], PDO::PARAM_INT);
             $stmt->bindValue("page", $data["rows"] * $data["page"], PDO::PARAM_INT);
@@ -157,14 +159,85 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "{\"type\": \"success\", \"lastPage\": $lastPage, \"rows\": " . json_encode($results) . "}";
 
         } catch (Exception $e) {
-            echo "{\"type\": \"error\", \"messages\": [\"An error occurred!\"]}";
-            http_response_code(503);
+            echo "{\"type\": \"error\", \"messages\": [\"An error occurred! ". $e->getMessage() . "\"]}";
             exit();
         }
 
     }
     // ok
     http_response_code(200);
+} elseif ($_SERVER["REQUEST_METHOD"] == "DELETE") {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $input = [];
+    foreach (["username", "userToDelete", "password"] as $k) {
+        $input[$k] = $data[$k];
+    }
+
+    $errors = validate($input, ["username", "username", "password"], ["", "", ""]);
+
+    if (!empty($errors)) {
+        echo "{\"type\": \"error\", \"message\": \"Invalid username or password\"}";
+        http_response_code(401);
+        exit();
+    }
+
+    [$id, $role] = get_role($conn, $input["username"], $input["password"]);
+    if ($role == "none") {
+        if ($id == -2) {
+            echo "{type: \"error\", \"message\": \"Unable to validate identity.\"}";
+            // service unavailable
+            http_response_code(503);
+        } else {
+            echo "{type: \"error\", \"message\": \"Invalid username or password\"}";
+            // unauthenticated
+            http_response_code(401);
+        }
+        exit();
+    }
+
+    if ($role != "superAdmin") {
+        http_response_code(403);
+        echo "{\"type\":\"error\", \"message\": \"Insufficent permission\"}";
+        exit();
+    }
+
+    try {
+        $query = "SELECT id FROM user_credentials WHERE username = ? LIMIT 1";
+        $stmt = $conn->prepare($query);
+        $stmt->bindValue(1, $input["userToDelete"]);
+        if (!$stmt->execute()) {
+            http_response_code(503);
+            echo "{\"type\": \"error\", \"message\": \"an unexcepted error occurred\"}";
+            exit();
+        }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        http_response_code(503);
+        echo "{\"type\": \"error\", \"message\": \"an unexcepted error occurred\"}";
+        exit();
+    }
+    $userIdToDelete = $row["id"];
+    // removing time!
+    try {
+        $detailsQuery = "DELETE FROM user_details WHERE userId = ? LIMIT 1";
+        $credentialsQuery = "DELETE FROM user_credentials WHERE id = ? LIMIT 1";
+        $detailsStmt = $conn->prepare($detailsQuery);
+        $credentialsStmt = $conn->prepare($credentialsQuery);
+        $detailsStmt->bindValue(1, $userIdToDelete);
+        $credentialsStmt->bindValue(1, $userIdToDelete);
+        if (!$detailsStmt->execute() || !$credentialsStmt->execute()) {
+            http_response_code(503);
+            echo "{\"type\": \"error\", \"message\": \"an unexcepted error occurred\"}";
+            exit();
+        }
+    } catch (Exception $e) {
+        http_response_code(503);
+        echo "{\"type\": \"error\", \"message\": \"an unexcepted error occurred\"}";
+        exit();
+    }
+    echo "{\"type\": \"success\"}";
+} else {
+    http_response_code(405);
 }
 
 ?>

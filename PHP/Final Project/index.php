@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 }
             }
         }
-        $image_name = "icons/standard_user";
+        $image_name = "icons/standard_user.png";
         if (isset($_FILES["icon"])) {
             switch ($_FILES["icon"]["error"]) {
                 case 0:
@@ -145,40 +145,40 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     goto fail;
                 }
                 $u = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($u === false) {
-                    throw new Exception("A strange error has occurred, please contact the administrators.");
-                }
-                $newUserId = (int) $u["id"];
-                try {
-                    $query = "INSERT INTO user_details SET userID = ?, firstName = ?, lastName = ?, iconName = ?";
-                    $stmt = $conn->prepare($query);
-                    $stmt->bindValue(1, $newUserId, PDO::PARAM_INT);
-                    $stmt->bindValue(2, $input["firstName"]);
-                    $stmt->bindValue(3, $input["lastName"]);
-                    $stmt->bindValue(4, $image_name);
-                    if (!$stmt->execute()) {
-                        goto removeUser;
-                    }
-                    echo "Success";
-                } catch (Exception $e) {
-                    removeUser:
-                    // uh oh, we couldn't add the details, let's remove the credentials to avoid a desync.
-                    try {
-                        $query = "DELETE FROM user_credentials WHERE id = ? LIMIT 1";
-                        $stmt = $conn->prepare($query);
-                        $stmt->bindValue(1, $newUserId, PDO::PARAM_INT);
-                        if (!$stmt->execute()) {
-                            goto failedToRemoveUser;
-                        }
-                    } catch (Exception $e) {
-                        failedToRemoveUser:
-                        // A very bad thing happened.
-                        throw new Exception("A fatal error has occurred, please contact the administrators.");
-                    }
-                }
             } catch (Exception $e) {
                 $registerErrors[] = "An unexpected error occurred, please try again later.";
                 goto fail;
+            }
+            if ($u === false) {
+                throw new Exception("A strange error has occurred, please contact the administrators.");
+            }
+            $newUserId = (int) $u["id"];
+            try {
+                $query = "INSERT INTO user_details SET userID = ?, firstName = ?, lastName = ?, iconName = ?";
+                $stmt = $conn->prepare($query);
+                $stmt->bindValue(1, $newUserId, PDO::PARAM_INT);
+                $stmt->bindValue(2, $input["firstName"]);
+                $stmt->bindValue(3, $input["lastName"]);
+                $stmt->bindValue(4, $image_name);
+                if (!$stmt->execute()) {
+                    goto removeUser;
+                }
+                echo "Success";
+            } catch (Exception $e) {
+                removeUser:
+                // uh oh, we couldn't add the details, let's remove the credentials to avoid a desync.
+                try {
+                    $query = "DELETE FROM user_credentials WHERE id = ? LIMIT 1";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindValue(1, $newUserId, PDO::PARAM_INT);
+                    if (!$stmt->execute()) {
+                        goto failedToRemoveUser;
+                    }
+                } catch (Exception $e) {
+                    failedToRemoveUser:
+                    // A very bad thing happened.
+                    throw new Exception("A fatal error has occurred, please contact the administrators.");
+                }
             }
         }
     } else {
